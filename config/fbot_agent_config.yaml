@@ -1,0 +1,7 @@
+/fbot_agent:
+  fbot_agent_node:
+    ros__parameters:
+      llm_model: ollama/gemma3
+      camera_topic: /astra2_top_camera/image_raw
+      named_poses:
+        dinning_room: [-2.26, 5.69, 0.0, 0.0, 0.0, -0.73, 0.68]

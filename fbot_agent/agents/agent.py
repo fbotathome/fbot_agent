@@ -9,12 +9,15 @@ import PIL
 from ros2_numpy import numpify
 from threading import Event
 from copy import deepcopy
+from fbot_agent_msgs.srv import AgentCommand
 
 class AgentNode(Node):
     def __init__(self, node_name):
         super().__init__(node_name)
         self.declare_parameters('~named_poses')
-        self.llm = LiteLLMModel(model_id='ollama/gemma3')
+        self.declare_parameter('~llm_model', 'ollama/gemma3')
+        self.declare_parameter('~camera_topic', '/camera/color/image_raw')
+        self.llm = LiteLLMModel(model_id=self.get_parameter('~llm_model').get_parameter_value().string_value)
         self.agent = CodeAgent(
             tools=self.get_tools(),
             model=self.llm,
@@ -22,7 +25,23 @@ class AgentNode(Node):
         )
         self.img_event = Event()
         self.img_event.clear()
-        self.img_sub = self.create_subscription(msg_type=Image, topic='/camera/color/image_raw', callback=self.on_camera_msg)
+        self.img_sub = self.create_subscription(msg_type=Image, topic=self.get_parameter('~camera_topic').get_parameter_value().string_value, callback=self.on_camera_msg)
+        self.agent_server = self.create_service(srv_type=AgentCommand, srv_name='/fbot_agent/execute_command', callback=self.agent_callback)
+
+    def get_available_named_poses(self):
+        return self.get_parameters_by_prefix(prefix='~named_poses')
+
+    def prepare_prompt(self, command: str):
+        return f"""
+        The following named poses are available: {self.get_available_named_poses()}
+        Your task is to: {command}
+        """
+    
+    def agent_callback(self, req: AgentCommand.Request):
+        final_answer = self.agent.run(
+            task=self.prepare_prompt(req.command)
+        ).dict['final_answer']
+        return AgentCommand.Response(response=final_answer)
 
     def on_camera_msg(self, msg: Image):
         self.image_obs = msg

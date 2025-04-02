@@ -4,13 +4,9 @@ from threading import Thread
 
 import rclpy.executors
 
-def main():
+def test_navigate():
     rclpy.init()
     node = AgentNode()
     executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(node)
     executor.spin()
-
-
-if __name__ == '__main__':
-    main()
