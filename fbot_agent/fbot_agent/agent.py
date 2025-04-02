@@ -1,8 +1,14 @@
+import PIL.Image
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
+from sensor_msgs.msg import Image
 from state_machine.states.navigation.navigate_to_pose import NavigateToPoseState
 from yasmin import StateMachine, Blackboard
 from smolagents import CodeAgent, tool, LiteLLMModel, ActionStep
+import PIL
+from ros2_numpy import numpify
+from threading import Event
+from copy import deepcopy
 
 class AgentNode(Node):
     def __init__(self, node_name):
@@ -12,13 +18,25 @@ class AgentNode(Node):
         self.agent = CodeAgent(
             tools=self.get_tools(),
             model=self.llm,
+            step_callbacks=[self.add_image_to_agent_obs,]
         )
+        self.img_event = Event()
+        self.img_event.clear()
+        self.img_sub = self.create_subscription(msg_type=Image, topic='/camera/color/image_raw', callback=self.on_camera_msg)
+
+    def on_camera_msg(self, msg: Image):
+        self.image_obs = msg
+        self.img_event.set()
 
     def get_tools(self):
         return [
             self.query_pose_by_name,
             self.navigate_to_pose
         ]
+    
+    def add_image_to_agent_obs(self, step_log: ActionStep, agent: CodeAgent):
+        self.img_event.wait()
+        step_log.observations_images = [PIL.Image.fromarray(numpify(deepcopy(self.image_obs)))]
 
     @tool
     def query_pose_by_name(self, name: str)->PoseStamped:
