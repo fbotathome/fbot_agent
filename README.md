@@ -7,6 +7,7 @@ On the Jetson Orin:
 
 On the NUC:
 
+- Run script "install_dependencies.sh"
 - Update "config/fbot_agent_config.yaml" with waypoints in the target environment.
 - Include the fbot_agent.launch.py from this package into some fbot_behavior launch with required navigation subsystems. The realsense must be publishing messages on the "/camera/camera/color/image_raw" topic.
 - Query the agent by calling the "/fbot_agent/execute_command" service.
