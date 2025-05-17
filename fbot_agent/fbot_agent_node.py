@@ -6,7 +6,7 @@ import rclpy.executors
 
 def main():
     rclpy.init()
-    node = AgentNode()
+    node = AgentNode(node_name='fbot_agent_node')
     executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(node)
     executor.spin()

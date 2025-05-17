@@ -12,6 +12,7 @@ def generate_launch_description():
             package='fbot_agent',
             executable='fbot_agent_node',
             namespace='fbot_agent',
-            parameters=[config,]
+            parameters=[config,],
+            output='screen'
         )
     ])
