@@ -140,9 +140,9 @@ class AgentNode(Node):
     def __init__(self, node_name):
         super().__init__(node_name)
         self.declare_parameters('~named_poses', [])
-        self.declare_parameter('~llm_model', 'ollama/gemma3')
+        self.declare_parameter('~llm_model', 'gemini/gemini-2.5-flash-preview-04-17')
         self.declare_parameter('~camera_topic', '/camera/camera/color/image_raw')
-        self.llm = LiteLLMModel(model_id=self.get_parameter('~llm_model').get_parameter_value().string_value, flatten_messages_as_text=False, api_base="http://jetson:11434/v1")
+        self.llm = LiteLLMModel(model_id=self.get_parameter('~llm_model').get_parameter_value().string_value, flatten_messages_as_text=False,) #api_base="http://jetson:11434/v1")
         self.agent = CodeAgent(
             tools=self.get_tools(),
             model=self.llm,
