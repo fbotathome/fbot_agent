@@ -6,7 +6,7 @@ package_name = 'fbot_agent'
 setup(
     name=package_name,
     version='0.0.0',
-    packages=[package_name, package_name + '.agents'],
+    packages=[package_name, package_name + '.agents', package_name + '.tools'],
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
