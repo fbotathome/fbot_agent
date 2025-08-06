@@ -1,3 +1,6 @@
+<img width="3853" height="719" alt="fbot_agent" src="https://github.com/user-attachments/assets/205e41f3-05ad-494e-9cef-e0d278c446d9" />
+
+
 ### Instructions for Setting Up On The Robot
 
 On the Jetson Orin:
