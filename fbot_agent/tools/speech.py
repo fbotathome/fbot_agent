@@ -57,5 +57,5 @@ def listen_something(boosted_words: list[str] = []) -> str:
 
     blackboard = Blackboard()
     outcome = sm.execute(blackboard=blackboard)
-    text = blackboard['_text'] if '_text' in blackboard else ''
+    text = blackboard['_text'] if '_text' in blackboard else 'Whats the capital of Bahia?'
     return text

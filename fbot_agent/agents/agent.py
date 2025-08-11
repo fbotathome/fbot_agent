@@ -15,7 +15,7 @@ import os
 from transformations import quaternion_from_euler
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
 
-from ..tools import navigate_to_pose, move_forward, rotate, pick_object, detect_object, query_pose_by_name, transform_pose, analyze_scene, detect_and_pick_object, search_object, approach_person_by_name, detect_and_approach_object, listen_something, say_something
+from ..tools import navigate_to_pose, move_forward, rotate, pick_object, detect_object, query_pose_by_name, transform_pose, analyze_scene, detect_and_pick_object, search_object, approach_person_by_name, detect_and_approach_object, listen_something, say_something, get_question_answer
 
 
 class AgentNode(Node):
@@ -34,6 +34,7 @@ class AgentNode(Node):
         self.img_event.clear()
         service_cb_group = ReentrantCallbackGroup()
         self.log_count = 0
+        self.is_egpsr = False
         self.img_sub = self.create_subscription(msg_type=Image, topic=self.get_parameter('~camera_topic').get_parameter_value().string_value, callback=self.on_camera_msg, callback_group=service_cb_group, qos_profile=10)
         self.get_logger().info(f'Subscribed to camera topic: {self.img_sub.topic} and {self.img_sub.topic_name}')
         self.agent_server = self.create_service(srv_type=AgentCommand, srv_name='/fbot_agent/execute_command', callback=self.agent_callback)
@@ -45,17 +46,29 @@ class AgentNode(Node):
         return named_poses
 
     def prepare_prompt(self, command: str):
-        return f"""
-        You are a domestic service robot. You will receive a task from a person who is in front of you, and its location is 'start_point'. 
-        You must speak every action you take, so the person can understand what you are doing.
-        If the task is for you to tell the person something, you only have to say the information for the person at the 'start_point' location, so save the answer for when you are back to the 'start_point' location.
-        If your task does not end at the 'start_point' location, you must return to it after finishing the task.
+        available_poses = self.get_available_named_poses()
+        
+        prompt = (
+            "You are a domestic service robot. You will receive a task from a person who is in front of you. "
+            "You must speak every action you take, so the person can understand what you are doing.\n"
+        )
+        if not self.is_egpsr:
+            prompt += (
+            "The person location is 'start_point'.\n"
+            "If the task is \"Tell me ...\", you only have to say the information for the person at the 'start_point' location, "
+            "so save the answer for when you are back to the 'start_point' location.\n"
+            "If your task does not end at the 'start_point' location, you must return to it after finishing the task.\n"
+            )
+        prompt += (
 
-        The following location names are available: {self.get_available_named_poses()}
-        Your task is to: {command}
-        """
+            f"The following location names are available: {available_poses}\n"
+            f"Your task is to: {command}\n"
+        )
+        return prompt
     
     def agent_callback(self, req: AgentCommand.Request, res: AgentCommand.Response):
+
+        self.is_egpsr = req.is_egpsr
         self.get_logger().info(f'Received command: {req.command} and waiting for image...')
         # self.img_event.wait()
         self.get_logger().info('Image received, processing command...')
@@ -79,7 +92,7 @@ class AgentNode(Node):
             move_forward,
             rotate,
             # pick_object,
-            # detect_object,
+            detect_object,
             analyze_scene,
             # query_pose_by_name,
             # transform_pose,
@@ -88,7 +101,8 @@ class AgentNode(Node):
             approach_person_by_name,
             detect_and_approach_object,
             listen_something,
-            say_something
+            say_something,
+            get_question_answer
 
         ]
     

@@ -72,6 +72,7 @@ def search_object(object_name: str) -> Pose:
     """
     Searches for an object in the scene by its name or description, returning its Pose in the 'map' frame. It tries to detect the object in different angles, moving the camera around the scene, and adjusting the view to improve detection chances.
     This function is a wrapper around detect_object to handle retries.
+    The object description can be a person, a person making some gesture, a simple object like a cup, a class of objects such as 'a dish', a description of an object such as "the heavist object in the room", etc.
 
     Args:
         object_name: A string with the name or description of the object to search for.

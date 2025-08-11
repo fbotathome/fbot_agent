@@ -1,8 +1,10 @@
 from geometry_msgs.msg import PoseStamped, Pose
-from state_machine.states.others.transform_poses import TransformPosesState
+from state_machine.states import TransformPosesState, ServiceCallerState
 from yasmin import StateMachine, Blackboard, CbState
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT
 from smolagents import tool
+from fbot_vision_msgs.srv import VLMQuestionAnswering
+
 
 @tool
 def transform_pose(pose: Pose|PoseStamped, target_frame: str, source_frame: str = '') -> PoseStamped:
@@ -59,3 +61,59 @@ def transform_pose(pose: Pose|PoseStamped, target_frame: str, source_frame: str 
         except KeyError:
             raise KeyError('Transformation did not produce a result.')
     return new_ps
+
+@tool
+def get_question_answer(question: str) -> str:
+    """
+    Provides answers to questions or quizzes asked from people in the environment. The answer is complete, so the robot can say it directly, without needing to add anything else.
+
+    Args:
+        question (str): The question or quiz to be answered.
+    Returns:
+        str: The answer to the question. 
+
+    """
+    brazil_knowledge = """
+    Knowledge for questions:
+    - São Paulo is the most populous city in Brazil with 12.03 million residents
+    - Brazil's independence was declared on September 7, 1822
+    - The first Brazilian astronaut went to space in March 2006 (Pontes)
+    - Pampulha Lake is located in Belo Horizonte
+    - Sergipe is the smallest Brazilian state in territorial extension
+    - The Itamaraty Palace is located in Brasília
+    - Tocantins is the newest state in Brazil
+    - Salvador is the capital of Bahia
+    - Acarajé is a typical food from Bahia state
+    - Bahia's flag colors are white, red and blue
+"""
+
+    question_obj =  VLMQuestionAnswering.Request()
+    question_obj.question = (
+        "You are a domestic robot. Answer the following question using only the knowledge provided below. "
+        "Respond with a single, concise sentence, without explanations or extra details.\n\n"
+        "Knowledge:\n" + brazil_knowledge +
+        "\nQuestion: " + question +
+        "\nAnswer (one simple sentence):"
+    )
+    question_obj.use_image = False
+
+    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm.add_state(
+        name='ASK_VLM',
+        state=ServiceCallerState(
+            service_name='/fbot_vision/vlm/question_answering/query',
+            service_type=VLMQuestionAnswering,
+            data=question_obj
+        ),
+        transitions={
+            SUCCEED: SUCCEED,
+            # ABORT: ABORT,
+            # CANCEL: CANCEL,
+            # TIMEOUT: TIMEOUT
+        }
+    )
+    blackboard = Blackboard()
+    outcome = sm.execute(blackboard=blackboard)
+    if outcome == SUCCEED:
+        return blackboard['_answer']
+    return None
