@@ -2,10 +2,11 @@ from smolagents import tool
 from geometry_msgs.msg import PoseStamped, Pose
 from .vision import detect_object
 from .others import transform_pose
-from yasmin import YASMIN_LOG_INFO
+from fbot_behavior.state_machine.machines import SaySomethingMachine
+from fbot_behavior.state_machine.states import InterbotixMoveToPoseState, WaitTimeState
 
-from yasmin import StateMachine, Blackboard, CbState
-from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT
+from yasmin import StateMachine, Blackboard, CbState, YASMIN_LOG_INFO
+from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
 # from state_machine.machines import PickUpClosestObjectMachine
 
 @tool
@@ -55,4 +56,57 @@ def detect_and_pick_object(object_name: str) -> bool:
 
     blackboard = Blackboard()
     outcome = sm.execute(blackboard=blackboard)
+    return outcome == SUCCEED
+
+@tool
+def give_object_to_user() -> bool:
+    """
+    Gives the current held object to the user. The robot must already be in front of the user.
+
+    Returns:
+        bool: True if the object was successfully given to the user, False otherwise.
+    """
+
+    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm.add_state(
+        name='SAY_GIVE_OBJECT',
+        state=SaySomethingMachine(data="I will now deliver the object to you. Please pick it up from my hand "),
+        transitions={
+            SUCCEED: "MOVE_TO_HOME",
+            ABORT: "MOVE_TO_HOME",
+            CANCEL: CANCEL,
+            TIMEOUT: "MOVE_TO_HOME"
+        }
+    )
+    sm.add_state(
+        name='MOVE_TO_HOME',
+        state=InterbotixMoveToPoseState(pose="Home"), 
+        transitions={
+            SUCCEED: "WAIT_TIME",
+            ABORT: "WAIT_TIME",
+            CANCEL: CANCEL,
+            TIMEOUT: "WAIT_TIME"
+        }
+    )
+    sm.add_state(
+        name='WAIT_TIME',
+        state=WaitTimeState(wait_time=2.0),
+        transitions={
+            SUCCEED: "OPEN_GRIPPER",
+            ABORT: "OPEN_GRIPPER",
+            CANCEL: CANCEL,
+            TIMEOUT: "OPEN_GRIPPER"
+        }
+    )
+    sm.add_state(
+        name="OPEN_GRIPPER",
+        state=InterbotixMoveToPoseState(target_joint="gripper", pose='open'),
+        transitions={
+            SUCCEED: SUCCEED,
+            ABORT: ABORT,
+            CANCEL: CANCEL,
+            TIMEOUT: TIMEOUT
+        }
+    )
+    outcome = sm.execute(blackboard=Blackboard())
     return outcome == SUCCEED

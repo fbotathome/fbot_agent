@@ -1,7 +1,7 @@
 from smolagents import tool
 from geometry_msgs.msg import PoseStamped, Pose
 from fbot_vision_msgs.msg import Detection3D
-from state_machine.states import TransformPosesState, ServiceCallerState
+from fbot_behavior.state_machine.states import TransformPosesState, ServiceCallerState
 from yasmin import StateMachine, Blackboard, CbState
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT
 from yasmin import YASMIN_LOG_INFO

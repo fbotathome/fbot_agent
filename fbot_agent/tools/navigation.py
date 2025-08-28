@@ -2,9 +2,9 @@ from geometry_msgs.msg import PoseStamped, PointStamped
 from nav2_msgs.action import NavigateToPose
 from yasmin import StateMachine, Blackboard, CbState, YASMIN_LOG_INFO, YASMIN_LOG_ERROR
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT, FAIL
-from state_machine.machines import NavigateToTargetMachine, SaySomethingMachine, RivaListenSomethingMachine, ApproachEntityByNameMachine
-from state_machine.states import NavigateToPoseState, MoveFixedValueState, DetectObjectState, TransformPosesState, ComputeTargetFromPoseState, PublisherState
-from state_machine.callback_state_utils import poseToPoseStamped, poseToPointStamped
+from fbot_behavior.state_machine.machines import NavigateToTargetMachine, SaySomethingMachine, RivaListenSomethingMachine, ApproachEntityByNameMachine
+from fbot_behavior.state_machine.states import NavigateToPoseState, MoveFixedValueState, DetectObjectState, TransformPosesState, ComputeTargetFromPoseState, PublisherState
+from fbot_behavior.state_machine.callback_state_utils import poseToPoseStamped, poseToPointStamped
 from smolagents import tool
 from ament_index_python.packages import get_package_share_directory
 import yaml
