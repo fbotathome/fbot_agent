@@ -18,7 +18,7 @@ def say_something(text: str) -> bool:
     sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
     sm.add_state(
         name='SAY_SOMETHING',
-        state=CbState(outcomes=[SUCCEED], cb=lambda blackboard: SUCCEED), #SaySomethingMachine(data=text),
+        state=SaySomethingMachine(data=text),
         transitions={
             SUCCEED: SUCCEED,
             # ABORT: ABORT,

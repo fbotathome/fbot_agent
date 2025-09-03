@@ -1,9 +1,10 @@
 from smolagents import tool
 from geometry_msgs.msg import PoseStamped, Pose
 from fbot_vision_msgs.msg import Detection3D
-from fbot_behavior.state_machine.states import TransformPosesState, ServiceCallerState
+from state_machine.states import TransformPosesState, ServiceCallerState, DetectObjectState
+from state_machine.machines import SearchObjectPoseMachine
 from yasmin import StateMachine, Blackboard, CbState
-from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT
+from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, FAIL, TIMEOUT
 from yasmin import YASMIN_LOG_INFO
 from .others import transform_pose
 from fbot_vision_msgs.srv import VLMQuestionAnswering
@@ -82,18 +83,20 @@ def search_object(object_name: str) -> Pose:
     """
     sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
     sm.add_state(
-        name='NAV_TO_POSE',
-        state=CbState(outcomes=[SUCCEED], cb=lambda blackboard: SUCCEED),#CRIAR MACHINE QUE MOVE A CAMERA EM DIVERSOS ÂNGULOS E TENTA DETECTAR O OBJETO
+        name='SEARCH',
+        state=SearchObjectPoseMachine(object_name),
         transitions={
             SUCCEED: SUCCEED,
-            # ABORT: ABORT,
-            # CANCEL: CANCEL,
-            # TIMEOUT: TIMEOUT
+            ABORT: ABORT,
+            CANCEL: CANCEL,
+            TIMEOUT: TIMEOUT,
+            FAIL: FAIL
         }
     )
     blackboard = Blackboard()
     outcome = sm.execute(blackboard=blackboard)
-    return outcome == SUCCEED
+    if outcome == SUCCEED:
+        return blackboard['searched_object_pose']
 
 
 @tool
@@ -109,7 +112,7 @@ def analyze_scene(question: str) -> str:
         str: A detailed answer about the visual scene based on the current camera image.
     """
 
-    return 'There are two drinks in the trash bin'
+    # return 'There are two drinks in the trash bin'
 
     question_obj =  VLMQuestionAnswering.Request()
     question_obj.question = "You are a domestic robot. Answer the following question based on the image provided. Your answer must be a phrase that can be spoken by the robot. Here is the question: " + question
@@ -136,4 +139,30 @@ def analyze_scene(question: str) -> str:
         return blackboard['_answer']
     return None
 
+@tool
+def count_objects(object_name):
+    """
+    Counts the number of objects in the scene by their name or description.
 
+    Args:
+        object_name: A string with the name or description of the objects to count.
+    Returns:
+        int: An integer with the number of objects detected in the scene.
+        None if no objects were detected.
+    """
+    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm.add_state(
+        name='SEARCH',
+        state=DetectObjectState(filter_list=[object_name]),
+        transitions={
+            SUCCEED: SUCCEED,
+            ABORT: ABORT,
+            CANCEL: CANCEL,
+            TIMEOUT: TIMEOUT,
+        }
+    )
+    blackboard = Blackboard()
+    outcome = sm.execute(blackboard=blackboard)
+
+    if outcome == SUCCEED:
+        return len(blackboard['detection'].detections)

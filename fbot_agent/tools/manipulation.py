@@ -2,8 +2,8 @@ from smolagents import tool
 from geometry_msgs.msg import PoseStamped, Pose
 from .vision import detect_object
 from .others import transform_pose
-from fbot_behavior.state_machine.machines import SaySomethingMachine
-from fbot_behavior.state_machine.states import InterbotixMoveToPoseState, WaitTimeState
+from state_machine.machines import SaySomethingMachine
+from state_machine.states import InterbotixMoveToPoseState, WaitTimeState
 
 from yasmin import StateMachine, Blackboard, CbState, YASMIN_LOG_INFO
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT

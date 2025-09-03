@@ -2,9 +2,9 @@ from geometry_msgs.msg import PoseStamped, PointStamped
 from nav2_msgs.action import NavigateToPose
 from yasmin import StateMachine, Blackboard, CbState, YASMIN_LOG_INFO, YASMIN_LOG_ERROR
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT, FAIL
-from fbot_behavior.state_machine.machines import NavigateToTargetMachine, SaySomethingMachine, RivaListenSomethingMachine, ApproachEntityByNameMachine
-from fbot_behavior.state_machine.states import NavigateToPoseState, MoveFixedValueState, DetectObjectState, TransformPosesState, ComputeTargetFromPoseState, PublisherState
-from fbot_behavior.state_machine.callback_state_utils import poseToPoseStamped, poseToPointStamped
+from state_machine.machines import NavigateToTargetMachine, SaySomethingMachine, RivaListenSomethingMachine, ApproachEntityByNameMachine, FollowMeMachine
+from state_machine.states import NavigateToPoseState, MoveFixedValueState, DetectObjectState, TransformPosesState, ComputeTargetFromPoseState, PublisherState
+from state_machine.callback_state_utils import poseToPoseStamped, poseToPointStamped
 from smolagents import tool
 from ament_index_python.packages import get_package_share_directory
 import yaml
@@ -79,8 +79,6 @@ def detect_and_approach_object(object: str) -> bool:
        bool: 'True' if the object is detected and approached successfully, 'False' otherwise.
    """
     
-    return True
-
     sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL, TIMEOUT])
     sm.add_state(
         name='DETECT_OBJECT',
@@ -129,6 +127,31 @@ def approach_person_by_name(name: str) -> bool:
     return outcome == SUCCEED
 
      
+
+@tool
+def follow_person() -> bool:
+    """
+    Follows the person placed in front of the robot until the person is no longer detected or says 'Hello Boris' to stop the following.
+    This function only ends when the following is stopped.
+    Returns:
+        bool: 'True' if following was successful, 'False' otherwise.
+    """
+    sm = StateMachine(outcomes=['succeeded', 'canceled', 'aborted'])
+    sm.add_state(
+        name='FOLLOW_PERSON',
+        state=FollowMeMachine(),
+        transitions={
+            SUCCEED: SUCCEED,
+            ABORT: ABORT,
+            CANCEL: CANCEL,
+            TIMEOUT: TIMEOUT
+        }
+    )
+
+    blackboard = Blackboard()
+    outcome = sm.execute(blackboard=blackboard)
+    return outcome == SUCCEED
+
 
 @tool
 def move_forward(distance: float)->bool:
