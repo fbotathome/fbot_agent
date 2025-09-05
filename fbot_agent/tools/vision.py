@@ -81,7 +81,7 @@ def search_object(object_name: str) -> Pose:
         Pose: A Pose message containing the detected object's position, already in the 'map' frame if detection is successful.
         Returns None if the object was not found in the scene
     """
-    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
     sm.add_state(
         name='SEARCH',
         state=SearchObjectPoseMachine(object_name),
@@ -118,7 +118,7 @@ def analyze_scene(question: str) -> str:
     question_obj.question = "You are a domestic robot. Answer the following question based on the image provided. Your answer must be a phrase that can be spoken by the robot. Here is the question: " + question
     question_obj.use_image = True
 
-    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
     sm.add_state(
         name='ASK_VLM',
         state=ServiceCallerState(
@@ -128,9 +128,9 @@ def analyze_scene(question: str) -> str:
         ),
         transitions={
             SUCCEED: SUCCEED,
-            # ABORT: ABORT,
-            # CANCEL: CANCEL,
-            # TIMEOUT: TIMEOUT
+            ABORT: ABORT,
+            CANCEL: CANCEL,
+            TIMEOUT: TIMEOUT
         }
     )
     blackboard = Blackboard()
@@ -140,7 +140,7 @@ def analyze_scene(question: str) -> str:
     return None
 
 @tool
-def count_objects(object_name):
+def count_objects(object_name: str) -> int:
     """
     Counts the number of objects in the scene by their name or description.
 
@@ -150,7 +150,7 @@ def count_objects(object_name):
         int: An integer with the number of objects detected in the scene.
         None if no objects were detected.
     """
-    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
     sm.add_state(
         name='SEARCH',
         state=DetectObjectState(filter_list=[object_name]),
@@ -166,3 +166,5 @@ def count_objects(object_name):
 
     if outcome == SUCCEED:
         return len(blackboard['detection'].detections)
+    else:
+        return 0

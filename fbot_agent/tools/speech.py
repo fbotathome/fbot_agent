@@ -1,5 +1,5 @@
 from yasmin import StateMachine, Blackboard, CbState
-from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT
+from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT, FAIL
 from state_machine.machines import SaySomethingMachine, RivaListenSomethingMachine
 
 from smolagents import tool
@@ -15,15 +15,15 @@ def say_something(text: str) -> bool:
     Returns:
         bool: True if the speech was successfully initiated, False otherwise.
     """
-    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
     sm.add_state(
         name='SAY_SOMETHING',
-        state=SaySomethingMachine(data=text),
+        state=SaySomethingMachine(data=text, timeout=10),
         transitions={
             SUCCEED: SUCCEED,
-            # ABORT: ABORT,
-            # CANCEL: CANCEL,
-            # TIMEOUT: TIMEOUT
+            ABORT: ABORT,
+            CANCEL: CANCEL,
+            TIMEOUT: TIMEOUT
         }
     )
     
@@ -43,7 +43,7 @@ def listen_something(boosted_words: list[str] = []) -> str:
     Returns:
         str: The recognized text. It will be an empty string if nothing was recognized.
     """
-    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
     sm.add_state(
         name='LISTEN_SOMETHING',
         state=CbState(outcomes=[SUCCEED], cb=lambda blackboard: SUCCEED), #RivaListenSomethingMachine(boosted_words=boosted_words),

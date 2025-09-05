@@ -6,7 +6,7 @@ from state_machine.machines import SaySomethingMachine
 from state_machine.states import InterbotixMoveToPoseState, WaitTimeState
 
 from yasmin import StateMachine, Blackboard, CbState, YASMIN_LOG_INFO
-from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
+from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT, FAIL
 # from state_machine.machines import PickUpClosestObjectMachine
 
 @tool
@@ -42,7 +42,7 @@ def detect_and_pick_object(object_name: str) -> bool:
     Returns:
         bool: True if the object was detected and picked, False otherwise.
     """
-    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
     sm.add_state(
         name='PICK_OBJECT',
         state=CbState(outcomes=[SUCCEED], cb=lambda blackboard: SUCCEED), #PickUpClosestObjectMachine(announce_object=True, detection_filter_list=[object_name], detection_filter_by_label=True),
@@ -67,7 +67,7 @@ def give_object_to_user() -> bool:
         bool: True if the object was successfully given to the user, False otherwise.
     """
 
-    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
     sm.add_state(
         name='SAY_GIVE_OBJECT',
         state=SaySomethingMachine(data="I will now deliver the object to you. Please pick it up from my hand "),

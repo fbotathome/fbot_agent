@@ -1,7 +1,7 @@
 from geometry_msgs.msg import PoseStamped, Pose
 from state_machine.states import TransformPosesState, ServiceCallerState
 from yasmin import StateMachine, Blackboard, CbState
-from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT
+from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT, FAIL
 from smolagents import tool
 from fbot_vision_msgs.srv import VLMQuestionAnswering
 
@@ -97,7 +97,7 @@ def get_question_answer(question: str) -> str:
     )
     question_obj.use_image = False
 
-    sm = StateMachine(outcomes=['aborted', 'canceled', 'succeeded', 'timeout'])
+    sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
     sm.add_state(
         name='ASK_VLM',
         state=ServiceCallerState(

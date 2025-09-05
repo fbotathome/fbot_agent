@@ -15,7 +15,7 @@ import os
 from transformations import quaternion_from_euler
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
 
-from ..tools import navigate_to_pose, move_forward, rotate, pick_object, detect_object, query_pose_by_name, transform_pose, analyze_scene, detect_and_pick_object, give_object_to_user, search_object, approach_person_by_name, detect_and_approach_object, listen_something, say_something, get_question_answer
+from ..tools import navigate_to_pose, move_forward, rotate, count_objects, detect_object, query_pose_by_name, transform_pose, analyze_scene, detect_and_pick_object, give_object_to_user, search_object, approach_person_by_name, detect_and_approach_object, listen_something, say_something, get_question_answer
 
 
 class AgentNode(Node):
@@ -94,6 +94,7 @@ class AgentNode(Node):
             # pick_object,
             detect_object,
             analyze_scene,
+            count_objects,
             # query_pose_by_name,
             # transform_pose,
             search_object,
