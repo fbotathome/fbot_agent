@@ -50,7 +50,7 @@ class AgentNode(Node):
         available_poses, object_labels = self.get_available_parameters()
 
         prompt = (
-            "You are a domestic service robot. You will receive a task from a person who is in front of you. "
+            "You are BORIS, a domestic service robot. You will receive a task from a person who is in front of you. "
             "You must speak every action you take, so the person can understand what you are doing.\n"
         )
         if not self.is_egpsr:

@@ -90,7 +90,7 @@ def give_object_to_user() -> bool:
     )
     sm.add_state(
         name='WAIT_TIME',
-        state=WaitTimeState(wait_time=2.0),
+        state=WaitTimeState(2.0),
         transitions={
             SUCCEED: "OPEN_GRIPPER",
             ABORT: "OPEN_GRIPPER",
@@ -102,10 +102,20 @@ def give_object_to_user() -> bool:
         name="OPEN_GRIPPER",
         state=InterbotixMoveToPoseState(target_joint="gripper", pose='open'),
         transitions={
-            SUCCEED: SUCCEED,
-            ABORT: ABORT,
+            SUCCEED: "MOVE_SLEEP",
+            ABORT: "MOVE_SLEEP",
             CANCEL: CANCEL,
-            TIMEOUT: TIMEOUT
+            TIMEOUT: "MOVE_SLEEP"
+        }
+    )
+    sm.add_state(
+        name='MOVE_SLEEP',
+        state=InterbotixMoveToPoseState(pose="Sleep"), 
+        transitions={
+            SUCCEED: SUCCEED,
+            ABORT: SUCCEED,
+            CANCEL: CANCEL,
+            TIMEOUT: SUCCEED
         }
     )
     outcome = sm.execute(blackboard=Blackboard())

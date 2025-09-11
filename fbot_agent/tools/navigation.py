@@ -54,12 +54,12 @@ def navigate_to_pose(pose_name: str) -> bool:
         sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL, TIMEOUT])
         sm.add_state(
             name='NAV_TO_POSE',
-            state=CbState(outcomes=[SUCCEED], cb=lambda blackboard: SUCCEED),#NavigateToTargetMachine([pose_name]),
+            state=NavigateToTargetMachine([pose_name]),
             transitions={
                 SUCCEED: SUCCEED,
-                # ABORT: ABORT,
-                # CANCEL: CANCEL,
-                # TIMEOUT: TIMEOUT
+                ABORT: ABORT,
+                CANCEL: CANCEL,
+                TIMEOUT: TIMEOUT
             }
         )
         blackboard = Blackboard()

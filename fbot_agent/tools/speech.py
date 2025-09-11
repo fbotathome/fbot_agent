@@ -46,7 +46,7 @@ def listen_something(boosted_words: list[str] = []) -> str:
     sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
     sm.add_state(
         name='LISTEN_SOMETHING',
-        state=CbState(outcomes=[SUCCEED], cb=lambda blackboard: SUCCEED), #RivaListenSomethingMachine(boosted_words=boosted_words),
+        state=RivaListenSomethingMachine(boosted_words=boosted_words),
         transitions={
             SUCCEED: SUCCEED,
             ABORT: ABORT,
