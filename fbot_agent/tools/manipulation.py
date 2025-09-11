@@ -2,7 +2,7 @@ from smolagents import tool
 from geometry_msgs.msg import PoseStamped, Pose
 from .vision import detect_object
 from .others import transform_pose
-from state_machine.machines import SaySomethingMachine
+from state_machine.machines import SaySomethingMachine, AskForPickUpMachine
 from state_machine.states import InterbotixMoveToPoseState, WaitTimeState
 
 from yasmin import StateMachine, Blackboard, CbState, YASMIN_LOG_INFO
@@ -45,12 +45,12 @@ def detect_and_pick_object(object_name: str) -> bool:
     sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
     sm.add_state(
         name='PICK_OBJECT',
-        state=CbState(outcomes=[SUCCEED], cb=lambda blackboard: SUCCEED), #PickUpClosestObjectMachine(announce_object=True, detection_filter_list=[object_name], detection_filter_by_label=True),
+        state=AskForPickUpMachine(object_name),
         transitions={
             SUCCEED: SUCCEED,
-            # ABORT: ABORT,
-            # CANCEL: CANCEL,
-            # TIMEOUT: TIMEOUT
+            ABORT: ABORT,
+            CANCEL: CANCEL,
+            TIMEOUT: TIMEOUT
         }
     )
 
