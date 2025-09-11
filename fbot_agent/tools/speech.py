@@ -49,9 +49,9 @@ def listen_something(boosted_words: list[str] = []) -> str:
         state=CbState(outcomes=[SUCCEED], cb=lambda blackboard: SUCCEED), #RivaListenSomethingMachine(boosted_words=boosted_words),
         transitions={
             SUCCEED: SUCCEED,
-            # ABORT: ABORT,
-            # CANCEL: CANCEL,
-            # TIMEOUT: TIMEOUT
+            ABORT: ABORT,
+            CANCEL: CANCEL,
+            TIMEOUT: TIMEOUT
         }
     )
 

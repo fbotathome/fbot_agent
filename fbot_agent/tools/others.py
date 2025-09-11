@@ -107,9 +107,9 @@ def get_question_answer(question: str) -> str:
         ),
         transitions={
             SUCCEED: SUCCEED,
-            # ABORT: ABORT,
-            # CANCEL: CANCEL,
-            # TIMEOUT: TIMEOUT
+            ABORT: ABORT,
+            CANCEL: CANCEL,
+            TIMEOUT: TIMEOUT
         }
     )
     blackboard = Blackboard()

@@ -39,15 +39,16 @@ class AgentNode(Node):
         self.get_logger().info(f'Subscribed to camera topic: {self.img_sub.topic} and {self.img_sub.topic_name}')
         self.agent_server = self.create_service(srv_type=AgentCommand, srv_name='/fbot_agent/execute_command', callback=self.agent_callback)
 
-    def get_available_named_poses(self):
+    def get_available_parameters(self):
         with open(os.path.join(get_package_share_directory('fbot_agent'), 'config', 'fbot_agent_config.yaml'), 'r') as f:
             yaml_data = yaml.load(f, Loader=yaml.FullLoader)
         named_poses = list(yaml_data['/fbot_agent']['fbot_agent_node']['ros__parameters']['named_poses'].keys())
-        return named_poses
+        object_labels = list(yaml_data['/fbot_agent']['fbot_agent_node']['ros__parameters']['object_labels'])
+        return named_poses, object_labels
 
     def prepare_prompt(self, command: str):
-        available_poses = self.get_available_named_poses()
-        
+        available_poses, object_labels = self.get_available_parameters()
+
         prompt = (
             "You are a domestic service robot. You will receive a task from a person who is in front of you. "
             "You must speak every action you take, so the person can understand what you are doing.\n"
@@ -62,6 +63,7 @@ class AgentNode(Node):
         prompt += (
 
             f"The following location names are available: {available_poses}\n"
+            f"The following object labels/descriptions are available for detection tools: {object_labels}\n"
             f"Your task is to: {command}\n"
         )
         return prompt

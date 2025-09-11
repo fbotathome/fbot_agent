@@ -22,3 +22,13 @@
         waste_basket: [-2.26, 5.69, 0.0, 0.0, 0.0, -0.73, 0.68]
         sink: [-2.26, 5.69, 0.0, 0.0, 0.0, -0.73, 0.68]
         start_point: [-2.26, 5.69, 0.0, 0.0, 0.0, -0.73, 0.68]
+      object_labels:
+        - person
+        - cup
+        - bottle
+        - chair
+        - monitor
+        - apple
+        - tv
+        - bowl
+        - banana

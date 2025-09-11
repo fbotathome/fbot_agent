@@ -112,7 +112,7 @@ def approach_person_by_name(name: str) -> bool:
     sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL, TIMEOUT])
     sm.add_state(
         name='DETECT_OBJECT',
-        state=ApproachEntityByNameMachine(entity='person', person_name=name),
+        state=ApproachEntityByNameMachine(entity='person', person_name=name, use_moondream=False),
         transitions={
             SUCCEED: SUCCEED,
             ABORT: ABORT,
