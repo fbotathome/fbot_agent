@@ -62,8 +62,8 @@ class AgentNode(Node):
             )
         prompt += (
 
-            f"The following location names are available: {available_poses}\n"
-            f"The following object labels/descriptions are available for detection tools: {object_labels}\n"
+            f"The following location names are available: {available_poses}.\n"
+            f"The following classes labels/descriptions are available for detection and manipulation tools: {object_labels}. Please note that you can only manipulate objects. You cannot manipulate a person. If your task is to take a person, you should guide them.\n"
             f"Your task is to: {command}\n"
         )
         return prompt
