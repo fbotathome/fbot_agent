@@ -68,16 +68,7 @@ def give_object_to_user() -> bool:
     """
 
     sm = StateMachine(outcomes=[ABORT, CANCEL, SUCCEED, TIMEOUT, FAIL])
-    sm.add_state(
-        name='SAY_GIVE_OBJECT',
-        state=SaySomethingMachine(data="I will now deliver the object to you. Please pick it up from my hand "),
-        transitions={
-            SUCCEED: "MOVE_TO_HOME",
-            ABORT: "MOVE_TO_HOME",
-            CANCEL: CANCEL,
-            TIMEOUT: "MOVE_TO_HOME"
-        }
-    )
+
     sm.add_state(
         name='MOVE_TO_HOME',
         state=InterbotixMoveToPoseState(pose="Home"), 
