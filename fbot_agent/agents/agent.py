@@ -52,6 +52,7 @@ class AgentNode(Node):
         prompt = (
             "You are BORIS, a domestic service robot. You will receive a task from a person who is in front of you. "
             "You must speak every action you take, so the person can understand what you are doing.\n"
+            "If the task does not make sense or is incomplete you should state that clearly, set your final answer to 'abort' and finish the task."
         )
         if not self.is_egpsr:
             prompt += (
